@@ -1,6 +1,6 @@
-# Welcome to the WIT Inventory API
+# Welcome to the Inventory API
 
-This repository contains the documentation for the WIT Inventory API, implemented in the Go programming language. Developers can utilize these endpoints to seamlessly integrate various functionalities into their applications.
+This repository contains the documentation for the Inventory API, implemented in the Go programming language. Developers can utilize these endpoints to seamlessly integrate various functionalities into their applications.
 
 ## Endpoints
 
