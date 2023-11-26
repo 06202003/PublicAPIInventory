@@ -1,4 +1,3 @@
-```markdown
 # Welcome to the 📦 Inventory API
 
 This repository contains the documentation for the Inventory API, implemented in the Go programming language. Developers can utilize these endpoints to seamlessly integrate various functionalities into their applications.
@@ -56,4 +55,3 @@ Developers can leverage the provided endpoints to integrate user authentication,
 - Keep the documentation up-to-date to reflect any changes or additions to the API.
 - Provide clear examples and usage scenarios for developers to understand and implement the API effectively.
 - Include details about error handling and status codes for troubleshooting.
-```
