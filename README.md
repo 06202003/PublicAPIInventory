@@ -1,42 +1,43 @@
-# Welcome to the Inventory API
+```markdown
+# Welcome to the 📦 Inventory API
 
 This repository contains the documentation for the Inventory API, implemented in the Go programming language. Developers can utilize these endpoints to seamlessly integrate various functionalities into their applications.
 
 ## Endpoints
 
-### Login
+### 🚪 Login
 
 - **Description:** Handles user authentication, allowing users to securely log in to the system. Generates a JWT (JSON Web Token) for authenticated requests.
 
-### Employees
+### 👩‍💼 Employees
 
 - **Description:** Manages operations related to employees, supporting retrieval, creation, updating, and deletion of employee information. Requires proper authentication for access.
 
-### Categories
+### 🗂️ Categories
 
 - **Description:** Manages operations related to categories, enabling retrieval of all categories, detailed information about a specific category, creation of new categories, updating existing categories, and deletion of categories.
 
-### Locations
+### 🌍 Locations
 
 - **Description:** Manages operations related to locations, enabling retrieval of all locations, detailed information about a specific location, creation of new locations, updating existing locations, and deletion of locations.
 
-### Rooms
+### 🏠 Rooms
 
 - **Description:** Manages operations related to rooms, facilitating organization and manipulation of information about each room. Includes retrieval, creation, updating, and deletion.
 
-### Inventories
+### 📋 Inventories
 
 - **Description:** Manages the inventory of items or equipment, allowing retrieval of all items, detailed information about a specific item, creation of new items, updating existing items, and deletion of items.
 
-### Usages
+### 📅 Usages
 
 - **Description:** Tracks the usage history of items or equipment, providing information about when an item was used, by whom, and for what purpose. Allows retrieval, creation, updating, and deletion of usage records.
 
-### Usage Histories
+### 📜 Usage Histories
 
 - **Description:** Tracks the usage history of items or equipment, offering information about when an item was used, by whom, and for what purpose. Supports retrieval, creation, updating, and deletion of usage history records.
 
-### Repair Histories
+### 🔧 Repair Histories
 
 - **Description:** Manages operations related to repair histories, tracking maintenance and repair activities for items or equipment. Supports retrieval, creation, updating, and deletion of repair history records.
 
@@ -55,3 +56,4 @@ Developers can leverage the provided endpoints to integrate user authentication,
 - Keep the documentation up-to-date to reflect any changes or additions to the API.
 - Provide clear examples and usage scenarios for developers to understand and implement the API effectively.
 - Include details about error handling and status codes for troubleshooting.
+```
