@@ -12,6 +12,7 @@ import (
 	"github.com/06202003/apiInventory/controllers/inventorycontroller"
 	"github.com/06202003/apiInventory/controllers/reporthistorypemakaiancontroller"
 	"github.com/06202003/apiInventory/controllers/reporthistoryperbaikancontroller"
+	"github.com/06202003/apiInventory/controllers/reporthistorykerusakancontroller"
 	"github.com/06202003/apiInventory/controllers/roomcontroller"
 	"github.com/06202003/apiInventory/controllers/locationcontroller"
 	"github.com/06202003/apiInventory/controllers/usagecontroller"
@@ -55,6 +56,9 @@ func main() {
 	api.HandleFunc("/usages/{id_pemakaian}", usagecontroller.Update).Methods("PUT")
 	api.HandleFunc("/usages/{id_pemakaian}", usagecontroller.Delete).Methods("DELETE")
 
+	// New routes for viewing usages by room and by employee
+	api.HandleFunc("/Usageroom/{id_ruangan}", usagecontroller.ViewByRoom).Methods("GET")
+	api.HandleFunc("/Usageemployee/{nomor_induk}", usagecontroller.ViewByEmployee).Methods("GET")
 
 	api.HandleFunc("/usageHistories", reporthistorypemakaiancontroller.Index).Methods("GET")
 	api.HandleFunc("/usageHistories/{id}", reporthistorypemakaiancontroller.Show).Methods("GET")
@@ -64,6 +68,12 @@ func main() {
 	api.HandleFunc("/repairHistories", reporthistoryperbaikancontroller.Create).Methods("POST")
 	api.HandleFunc("/repairHistories/{id}", reporthistoryperbaikancontroller.Update).Methods("PUT")
 	api.HandleFunc("/repairHistories/{id}", reporthistoryperbaikancontroller.Delete).Methods("DELETE")
+
+	api.HandleFunc("/problemHistories", reporthistorykerusakancontroller.Index).Methods("GET")
+	api.HandleFunc("/problemHistories/{id}", reporthistorykerusakancontroller.Show).Methods("GET")
+	api.HandleFunc("/problemHistories", reporthistorykerusakancontroller.Create).Methods("POST")
+	api.HandleFunc("/problemHistories/{id}", reporthistorykerusakancontroller.Update).Methods("PUT")
+	api.HandleFunc("/problemHistories/{id}", reporthistorykerusakancontroller.Delete).Methods("DELETE")
 
 	api.HandleFunc("/rooms", roomcontroller.Index).Methods("GET")
 	api.HandleFunc("/rooms/{id_ruangan}", roomcontroller.Show).Methods("GET")
@@ -76,6 +86,8 @@ func main() {
 	api.HandleFunc("/locations", locationcontroller.Create).Methods("POST")
 	api.HandleFunc("/locations/{id_lokasi}", locationcontroller.Update).Methods("PUT")
 	api.HandleFunc("/locations/{id_lokasi}", locationcontroller.Delete).Methods("DELETE")
+
+	
 
 	api.Use(middlewares.JWTMiddleware)
 

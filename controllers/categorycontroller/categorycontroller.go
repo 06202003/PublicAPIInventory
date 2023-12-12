@@ -35,7 +35,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
     var category models.Category
     if err := models.DB.First(&category, "id_kategori = ?", id).Error; err != nil {
         // Handling the case where the category is not found
-        helper.ResponseJSON(w, http.StatusNotFound, map[string]string{"message": "Data tidak ditemukan"})
+        helper.ResponseJSON(w, http.StatusNotFound, map[string]string{"message": "Kategori tidak ditemukan"})
         return
     }
 

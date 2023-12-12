@@ -11,7 +11,6 @@ type Inventory struct {
 	UsefulLife     int64       `gorm:"column:masa_manfaat" json:"masa_manfaat"`
 	Depreciation   int64       `gorm:"column:depresiasi" json:"depresiasi"`
 	Description    string    `gorm:"column:deskripsi;type:varchar(255)" json:"deskripsi"`
-	Status         string    `gorm:"column:status;type:varchar(20)" json:"status"`
 	CategoryID     string    `gorm:"column:id_kategori;type:varchar(3);" json:"id_kategori"`
 	Year1		   int64    `gorm:"column:tahun_1" json:"tahun_1"`
 	Year2		   int64    `gorm:"column:tahun_2" json:"tahun_2"`
@@ -28,3 +27,5 @@ type Inventory struct {
 func (Inventory) TableName() string {
 	return "inventory"
 }
+
+// AssetCode --> auto increment singkatan

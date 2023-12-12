@@ -20,7 +20,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["nomor_induk"]
 
 	if err := models.DB.First(&employee, "nomor_induk = ?", id).Error; err != nil {
-		helper.ResponseJSON(w, http.StatusNotFound, map[string]string{"message": "Data tidak ditemukan"})
+		helper.ResponseJSON(w, http.StatusNotFound, map[string]string{"message": "Karyawan tidak ditemukan"})
 		return
 	}
 

@@ -7,6 +7,7 @@ type Usage struct {
 	IdRuang           string  `gorm:"column:id_ruangan;primaryKey" json:"id_ruangan"`
 	AssetCode 		 	string  `gorm:"column:kode_aset;primaryKey" json:"kode_aset"`
 	EmployeeID 			string   `gorm:"column:nomor_induk;primaryKey" json:"nomor_induk"`
+	Status 				string `gorm:"column:status;" json:"status"`
 
 	Room Room `gorm:"foreignKey:IdRuang" json:"Room"`
 	Employee Employee `gorm:"foreignKey:EmployeeID" json:"Employee"`

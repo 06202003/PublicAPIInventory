@@ -10,3 +10,4 @@ type Category struct {
 func (Category) TableName() string {
 	return "kategori"
 }
+

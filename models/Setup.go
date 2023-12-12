@@ -39,6 +39,7 @@ func autoMigrateAllTables(db *gorm.DB) {
         &Employee{},
         &ReportHistoryPemakaian{},
         &ReportHistoryPerbaikan{},
+        &ReportHistoryKerusakan{},
     }
     
 
@@ -51,3 +52,4 @@ func autoMigrateAllTables(db *gorm.DB) {
     }
 
 }
+
