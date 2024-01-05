@@ -28,7 +28,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 }
 
 func Create(w http.ResponseWriter, r *http.Request) {
-	var employee models.Employee
+	var employee []models.Employee
 
 	if err := json.NewDecoder(r.Body).Decode(&employee); err != nil {
 		helper.ResponseJSON(w, http.StatusBadRequest, map[string]string{"message": err.Error()})

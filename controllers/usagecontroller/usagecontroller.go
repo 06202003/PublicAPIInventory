@@ -2,13 +2,14 @@ package usagecontroller
 
 import (
 	"encoding/json"
-	"net/http"
-	"time"
 	"fmt"
+	"net/http"
 	"strconv"
-	"github.com/gorilla/mux"
+	"time"
+
 	"github.com/06202003/apiInventory/helper"
 	"github.com/06202003/apiInventory/models"
+	"github.com/gorilla/mux"
 )
 
 func Index(w http.ResponseWriter, r *http.Request) {
@@ -21,7 +22,6 @@ func Index(w http.ResponseWriter, r *http.Request) {
 func Show(w http.ResponseWriter, r *http.Request) {
 	var usage models.Usage
 	id := mux.Vars(r)["id_pemakaian"]
-	
 
 	if err := models.DB.Preload("Employee").Preload("Inventory").Preload("Inventory.Category").Preload("Room").Preload("Room.Location").First(&usage, "id_pemakaian = ?", id).Error; err != nil {
 		helper.ResponseJSON(w, http.StatusNotFound, map[string]string{"message": "Pemakaian tidak ditemukan"})
@@ -135,7 +135,6 @@ func getLastUsageByCategory(categoryID string) models.Usage {
 	return lastUsage
 }
 
-
 func Delete(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id_pemakaian"]
 
@@ -185,7 +184,6 @@ func createHistoryPemakaian(oldUsage, newUsage models.Usage) {
 		models.DB.Create(&historyPemakaian)
 	}
 }
-
 
 func GenerateIDPemakaian(categoryID string, lastUsage models.Usage) string {
 	if lastUsage.IdPemakaian == "" {

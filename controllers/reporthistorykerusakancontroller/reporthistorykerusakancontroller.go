@@ -2,8 +2,9 @@ package reporthistorykerusakancontroller
 
 import (
 	"encoding/json"
-	"net/http"
 	"fmt"
+	"net/http"
+
 	"github.com/06202003/apiInventory/helper"
 	"github.com/06202003/apiInventory/models"
 	"github.com/gorilla/mux"
@@ -23,7 +24,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 	var reportkerusakanHistories models.ReportHistoryKerusakan
 	id := mux.Vars(r)["id"]
 
-	if err := models.DB.Preload("Usage").Preload("Usage.Inventory").Preload("Usage.Inventory.Category").Preload("Usage.Room").Preload("Usage.Room.Location").Preload("Usage.Employee").First(&reportkerusakanHistories, id).Error; err != nil {
+	if err := models.DB.Preload("Usage").Preload("Usage.Inventory").Preload("Usage.Inventory.Category").Preload("Usage.Room").Preload("Usage.Room.Location").Preload("Usage.Employee").First(&reportkerusakanHistories, "id = ?", id).Error; err != nil {
 		helper.ResponseJSON(w, http.StatusNotFound, map[string]string{"message": "history kerusakan tidak ditemukan"})
 		return
 	}
@@ -39,7 +40,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-	usageID := reportkerusakanHistories.IdPemakaian
+    usageID := reportkerusakanHistories.IdPemakaian
 
     // Generate the next available ID
     nextID, err := generateNextID(usageID)
@@ -56,12 +57,23 @@ func Create(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    // Create a log entry for the damage history
+    logKerusakan := models.LogKerusakan{
+        IdHistory:   reportkerusakanHistories.IdHistory,
+        IdPemakaian: reportkerusakanHistories.IdPemakaian,
+        DamageDate:  reportkerusakanHistories.DamageDate,
+    }
+
+    if err := models.DB.Create(&logKerusakan).Error; err != nil {
+        helper.ResponseJSON(w, http.StatusInternalServerError, map[string]string{"message": "Gagal membuat log kerusakan"})
+        return
+    }
+
     // Update the status of the associated usage item to "rusak"
     updateUsageStatus(reportkerusakanHistories.IdPemakaian, "rusak")
 
     helper.ResponseJSON(w, http.StatusCreated, map[string]interface{}{"message": "Data Berhasil Dibuat"})
 }
-
 
 func Update(w http.ResponseWriter, r *http.Request) {
 	var ReportHistoryKerusakan models.ReportHistoryKerusakan
@@ -90,7 +102,10 @@ func Delete(w http.ResponseWriter, r *http.Request) {
     }
 
     // Update the status of the associated usage item to "baik"
-    updateUsageStatus(reportkerusakanHistories.Usage.IdPemakaian, "baik")
+    if err := updateUsageStatus(reportkerusakanHistories.IdPemakaian, "baik"); err != nil {
+        helper.ResponseJSON(w, http.StatusInternalServerError, map[string]string{"message": "Gagal mengupdate status usage"})
+        return
+    }
 
     if err := models.DB.Delete(&reportkerusakanHistories).Error; err != nil {
         helper.ResponseJSON(w, http.StatusInternalServerError, map[string]string{"message": "Gagal menghapus history perbaikan"})
@@ -100,30 +115,33 @@ func Delete(w http.ResponseWriter, r *http.Request) {
     helper.ResponseJSON(w, http.StatusNoContent, map[string]interface{}{"message": "Data berhasil dihapus"})
 }
 
-func updateUsageStatus(usageID string, status string) {
+
+func updateUsageStatus(usageID string, status string) error {
     var usage models.Usage
     if err := models.DB.Where("id_pemakaian = ?", usageID).First(&usage).Error; err != nil {
         // Handle the error (Usage not found)
         fmt.Println("Usage not found")
-        return
+        return err
     }
 
     usage.Status = status
     if err := models.DB.Save(&usage).Error; err != nil {
         // Handle the error (failed to update Usage status)
         fmt.Println("Failed to update Usage status")
-        return
+        return err
     }
+
+    return nil
 }
 
 
 func generateNextID(usageID string) (string, error) {
-    var count int64
-    if err := models.DB.Model(&models.ReportHistoryKerusakan{}).Where("id_pemakaian = ?", usageID).Error; err != nil {
-        return "", err
-    }
+	var count int64
+	if err := models.DB.Model(&models.ReportHistoryKerusakan{}).Where("id_pemakaian = ?", usageID).Error; err != nil {
+		return "", err
+	}
 
-    // Increment the count to generate the next ID
-    nextID := fmt.Sprintf("%s-%03d", usageID, count+1)
-    return nextID, nil
+	// Increment the count to generate the next ID
+	nextID := fmt.Sprintf("%s-%03d", usageID, count+1)
+	return nextID, nil
 }

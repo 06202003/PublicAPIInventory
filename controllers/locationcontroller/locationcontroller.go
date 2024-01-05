@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/gorilla/mux"
 	"github.com/06202003/apiInventory/helper"
 	"github.com/06202003/apiInventory/models"
+	"github.com/gorilla/mux"
 )
 
 func Index(w http.ResponseWriter, r *http.Request) {
@@ -28,7 +28,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 }
 
 func Create(w http.ResponseWriter, r *http.Request) {
-	var location models.Location
+	var location []models.Location
 
 	if err := json.NewDecoder(r.Body).Decode(&location); err != nil {
 		helper.ResponseJSON(w, http.StatusBadRequest, map[string]string{"message": err.Error()})

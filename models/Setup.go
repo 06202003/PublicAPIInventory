@@ -1,8 +1,8 @@
 package models
 
 import (
-    "gorm.io/driver/mysql"
-    "gorm.io/gorm"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 var DB *gorm.DB
@@ -40,6 +40,11 @@ func autoMigrateAllTables(db *gorm.DB) {
         &ReportHistoryPemakaian{},
         &ReportHistoryPerbaikan{},
         &ReportHistoryKerusakan{},
+        &LogKerusakan{},
+        &Skill{},
+        &SkillEmployee{},
+        &Portfolio{},
+        &PortfolioEmployee{},
     }
     
 

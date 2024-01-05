@@ -19,13 +19,13 @@ func Index(w http.ResponseWriter, r *http.Request) {
 }
 
 func Show(w http.ResponseWriter, r *http.Request) {
-    var reportHistory models.ReportHistoryPemakaian
-    id := mux.Vars(r)["id"]
+	var reportHistory models.ReportHistoryPemakaian
+	id := mux.Vars(r)["id"]
 
-    if err := models.DB.Preload("Usage").Preload("Usage.Inventory").Preload("Usage.Inventory.Category").Preload("Usage.Room").Preload("Usage.Room.Location").Preload("Usage.Employee").First(&reportHistory, "id = ?", id).Error; err != nil {
-        helper.ResponseJSON(w, http.StatusNotFound, map[string]string{"message": "History pemakaian tidak ditemukan"})
-        return
-    }
+	if err := models.DB.Preload("Usage").Preload("Usage.Inventory").Preload("Usage.Inventory.Category").Preload("Usage.Room").Preload("Usage.Room.Location").Preload("Usage.Employee").First(&reportHistory, "id = ?", id).Error; err != nil {
+		helper.ResponseJSON(w, http.StatusNotFound, map[string]string{"message": "History pemakaian tidak ditemukan"})
+		return
+	}
 
-    helper.ResponseJSON(w, http.StatusOK, map[string]interface{}{"ReportHistory": reportHistory})
+	helper.ResponseJSON(w, http.StatusOK, map[string]interface{}{"ReportHistory": reportHistory})
 }

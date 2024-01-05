@@ -2,8 +2,9 @@ package reporthistoryperbaikancontroller
 
 import (
 	"encoding/json"
-	"net/http"
 	"fmt"
+	"net/http"
+
 	"github.com/06202003/apiInventory/helper"
 	"github.com/06202003/apiInventory/models"
 	"github.com/gorilla/mux"
@@ -20,15 +21,15 @@ func Index(w http.ResponseWriter, r *http.Request) {
 }
 
 func Show(w http.ResponseWriter, r *http.Request) {
-	var reportHistory models.ReportHistoryPerbaikan
-	id := mux.Vars(r)["id"]
+	var reportHistories models.ReportHistoryPerbaikan
+	id := mux.Vars(r)["id_perbaikan"]
 
-	if err := models.DB.Preload("ReportHistoryKerusakan.Usage").Preload("ReportHistoryKerusakan.Usage.Inventory").Preload("ReportHistoryKerusakan.Usage.Inventory.Category").Preload("ReportHistoryKerusakan.Usage.Room").Preload("ReportHistoryKerusakan.Usage.Room.Location").Preload("ReportHistoryKerusakan.Usage.Employee").First(&reportHistory, id).Error; err != nil {
+	if err := models.DB.Preload("ReportHistoryKerusakan.Usage").Preload("ReportHistoryKerusakan.Usage.Inventory").Preload("ReportHistoryKerusakan.Usage.Inventory.Category").Preload("ReportHistoryKerusakan.Usage.Room").Preload("ReportHistoryKerusakan.Usage.Room.Location").Preload("ReportHistoryKerusakan.Usage.Employee").First(&reportHistories, "id_perbaikan = ?", id).Error; err != nil {
 		helper.ResponseJSON(w, http.StatusNotFound, map[string]string{"message": "history perbaikan tidak ditemukan"})
 		return
 	}
 
-	helper.ResponseJSON(w, http.StatusOK, map[string]interface{}{"Perbaikan": reportHistory})
+	helper.ResponseJSON(w, http.StatusOK, map[string]interface{}{"Perbaikan": reportHistories})
 }
 
 func Create(w http.ResponseWriter, r *http.Request) {
@@ -40,9 +41,9 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := updateUsageStatusThroughDamageRecord(reportHistoryPerbaikan.IdHistoryKerusakan, "rusak"); err != nil {
-        helper.ResponseJSON(w, http.StatusInternalServerError, map[string]string{"message": "Failed to update usage status"})
-        return
-    }
+		helper.ResponseJSON(w, http.StatusInternalServerError, map[string]string{"message": "Failed to update usage status"})
+		return
+	}
 
 	if err := models.DB.Create(&reportHistoryPerbaikan).Error; err != nil {
 		helper.ResponseJSON(w, http.StatusInternalServerError, map[string]string{"message": "Gagal membuat history perbaikan"})
@@ -54,14 +55,14 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 func Update(w http.ResponseWriter, r *http.Request) {
 	var reportHistoryPerbaikan models.ReportHistoryPerbaikan
-	id := mux.Vars(r)["id"]
+	id := mux.Vars(r)["id_perbaikan"]
 
 	if err := json.NewDecoder(r.Body).Decode(&reportHistoryPerbaikan); err != nil {
 		helper.ResponseJSON(w, http.StatusBadRequest, map[string]string{"message": err.Error()})
 		return
 	}
 
-	if err := models.DB.Model(&reportHistoryPerbaikan).Where("id = ?", id).Updates(&reportHistoryPerbaikan).Error; err != nil {
+	if err := models.DB.Model(&reportHistoryPerbaikan).Where("id_perbaikan = ?", id).Updates(&reportHistoryPerbaikan).Error; err != nil {
 		helper.ResponseJSON(w, http.StatusBadRequest, map[string]string{"message": "Gagal memperbarui history perbaikan"})
 		return
 	}
@@ -71,9 +72,9 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 func Delete(w http.ResponseWriter, r *http.Request) {
 	var reportHistoryPerbaikan models.ReportHistoryPerbaikan
-	id := mux.Vars(r)["id"]
+	id := mux.Vars(r)["id_perbaikan"]
 
-	if err := models.DB.First(&reportHistoryPerbaikan, "id = ?", id).Error; err != nil {
+	if err := models.DB.First(&reportHistoryPerbaikan, "id_perbaikan = ?", id).Error; err != nil {
 		helper.ResponseJSON(w, http.StatusNotFound, map[string]string{"message": "Data not found"})
 		return
 	}
@@ -81,51 +82,85 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	// Store the ID of the associated damage record
 	idHistoryKerusakan := reportHistoryPerbaikan.IdHistoryKerusakan
 
-	// Delete the repair record, which will automatically delete the corresponding damage record
-	if err := models.DB.Delete(&reportHistoryPerbaikan).Error; err != nil {
-		helper.ResponseJSON(w, http.StatusInternalServerError, map[string]string{"message": "Failed to delete history perbaikan"})
+	// Update the status of the associated usage item to "baik"
+	if err := updateUsageStatusThroughDamageRecord(idHistoryKerusakan, "baik"); err != nil {
+		helper.ResponseJSON(w, http.StatusInternalServerError, map[string]string{"message": "Failed to update usage status"})
 		return
 	}
 
-	// Now, update the status of the associated usage item to "baik" using the corresponding damage record
-	if err := updateUsageStatusThroughDamageRecord(idHistoryKerusakan, "baik"); err != nil {
-		helper.ResponseJSON(w, http.StatusInternalServerError, map[string]string{"message": "Failed to update usage status"})
+	// Delete the repair record
+	if err := models.DB.Delete(&reportHistoryPerbaikan).Error; err != nil {
+		helper.ResponseJSON(w, http.StatusInternalServerError, map[string]string{"message": "Failed to delete history perbaikan"})
 		return
 	}
 
 	helper.ResponseJSON(w, http.StatusNoContent, map[string]interface{}{"message": "Data deleted successfully"})
 }
 
-
-// Function to update the usage status through the corresponding damage record
 func updateUsageStatusThroughDamageRecord(idHistoryKerusakan string, status string) error {
-    var reportHistoryKerusakan models.ReportHistoryKerusakan
+	var reportHistoryKerusakan models.ReportHistoryKerusakan
 
-    if err := models.DB.First(&reportHistoryKerusakan, "id = ?", idHistoryKerusakan).Error; err != nil {
-        return err
-    }
+	// Preload the Usage field when querying the ReportHistoryKerusakan model
+	if err := models.DB.Preload("Usage").First(&reportHistoryKerusakan, "id = ?", idHistoryKerusakan).Error; err != nil {
+		return err
+	}
 
-    // Assuming there's a direct reference to the Usage record through the ReportHistoryKerusakan record
-    usageID := reportHistoryKerusakan.Usage.IdPemakaian
+	// Assuming there's a direct reference to the Usage record through the ReportHistoryKerusakan record
+	usageID := reportHistoryKerusakan.Usage.IdPemakaian
 
-    // Update the status of the associated usage item to "baik"
-	updateUsageStatus(usageID, status)
-    return nil
+	// Print or log the usageID to verify its value
+	fmt.Println("Usage ID:", usageID)
+
+	// Update the status of the associated usage item
+	if err := updateUsageStatus(usageID, status); err != nil {
+		return err
+	}
+
+	// Check if the updated status is "baik"
+	if status == "baik" {
+		// Delete the associated ReportHistoryKerusakan record
+		if err := deleteReportHistoryKerusakan(idHistoryKerusakan); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 
-func updateUsageStatus(usageID string, status string) {
+// Function to update the usage status
+func updateUsageStatus(usageID string, status string) error {
 	var usage models.Usage
-	if err := models.DB.First(&usage, usageID).Error; err != nil {
+	if err := models.DB.Where("id_pemakaian = ?", usageID).First(&usage).Error; err != nil {
 		// Handle the error (Usage not found)
 		fmt.Println("Usage not found")
-		return
+		return err
 	}
 
 	usage.Status = status
 	if err := models.DB.Save(&usage).Error; err != nil {
 		// Handle the error (failed to update Usage status)
 		fmt.Println("Failed to update Usage status")
-		return
+		return err
 	}
+
+	return nil
+}
+
+
+
+// Function to delete ReportHistoryKerusakan record
+func deleteReportHistoryKerusakan(idHistoryKerusakan string) error {
+	var reportHistoryKerusakan models.ReportHistoryKerusakan
+
+	if err := models.DB.First(&reportHistoryKerusakan, "id = ?", idHistoryKerusakan).Error; err != nil {
+		return err
+	}
+
+	// Delete the ReportHistoryKerusakan record
+	if err := models.DB.Delete(&reportHistoryKerusakan).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
